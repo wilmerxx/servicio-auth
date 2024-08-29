@@ -3,6 +3,7 @@ package com.grupo1.ganaderiagrupo1.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.DecodingException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -32,8 +33,16 @@ public class JwtTokenUtil {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }
-    private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+    public Claims getAllClaimsFromToken(String token) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(secret)
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (DecodingException e) {
+            // Handle the decoding exception
+            throw new IllegalArgumentException("Invalid JWT token", e);
+        }
     }
 
     private Boolean isTokenExpired(String token) {
